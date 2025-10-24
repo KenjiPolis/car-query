@@ -1,0 +1,587 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>車號查詢系統 (內嵌資料版)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-top: 0;
+        }
+        #search-section {
+            margin-top: 25px;
+            text-align: center;
+        }
+        #search-section label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+        #search-input {
+            width: 70%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+        #search-button {
+            padding: 12px 20px;
+            border: none;
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #search-button:hover {
+            background-color: #1558b0;
+        }
+        #results-area {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            min-height: 50px;
+        }
+        .result-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item .plate {
+            font-weight: bold;
+            color: #000;
+        }
+        .result-item .unit {
+            color: #555;
+            margin-left: 15px;
+        }
+        .no-result {
+            color: #d9534f;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>車號查詢系統</h1>
+
+        <div id="search-section">
+            <label for="search-input">輸入車號數字 (3-4碼) 進行查詢</label>
+            <div>
+                <input type="text" id="search-input" placeholder="例如: 1234 或 567">
+                <button id="search-button">查詢</button>
+            </div>
+        </div>
+
+        <div id="results-area">
+        </div>
+    </div>
+
+    <script>
+        // 資料會被注入到這裡
+        const vehicleData = 
+[
+    {
+        "fullPlate": "AGF-8631",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "111-1111",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BKD-1372",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BVK-0617",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "7212-LD",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AUW-8059",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "7212-LD",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "9053R7",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AJW-6156",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BDC-3860",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BXL-7252",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AUX-8057",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BYL-9221",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "ARS-8169",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BTP-8599",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "7251-NL",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "1153-XY",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "1963-FS",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "1963-FS",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AVB-8793",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "BMV-5679",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "BTX-7027",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "BMV-5679",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "0753-R7",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "ALX-9215",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BCN-3663",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "8201-TU",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BVD-2131",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "AGB-7339",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "ALH-7207",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "3N-7283",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "BHP-5385",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AWS-1073",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "ANJ-0121",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "ANJ-9626",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "8277-C6",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "2556-JC",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BRX-1911",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "9100-SG",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BUZ-6795",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AHD-6186",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "BTY-7711",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BVJ-8589",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AYU-8529",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BVJ-8589",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "7868-D3",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "ZX-5308",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "6J-1803",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "CAA-1382",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "2192-L2",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "2857-C3",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "AHQ-5777",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AVH-7778",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AUS-5560",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BRF-7757",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "AHK-6259",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BPZ-0977",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "5Q-7971",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BTD-6395",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "7225-GT",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "5619-UT",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "BFR-5726",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BCY-7625",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AQC-6717",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "5M-5682",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AUQ-8689",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AHJ-2033",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BSF-1003",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AMB-5300",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AMQ-5396",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "3037-D9",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AVD-3008",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "7171-SL",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "9918-WF",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "0775-XY",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AHQ8007",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "AQG-5227",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "BEE-0087",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BPV-6760",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "BWP-1983",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BFZ-7786",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "2803-U7",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "1988-VZ",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AYY-8391",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "UQ-0670",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "BEw-7518",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BHT-8616",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AMD-3976",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "E7-6650",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "M7-9721",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "1070-ZG",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "5991-RZ",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "3361-N7",
+        "unit": "第二中隊"
+    },
+    {
+        "fullPlate": "M5-6192",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "6966-R9",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "AZM-3292",
+        "unit": "大隊部"
+    },
+    {
+        "fullPlate": "AUC-9651",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "7V-7827",
+        "unit": "第一中隊"
+    },
+    {
+        "fullPlate": "BMG-2070",
+        "unit": "第三中隊"
+    },
+    {
+        "fullPlate": "AMD-1729",
+        "unit": "第三中隊"
+    }
+]
+        ;
+        
+        // --- 底下是程式邏輯 ---
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsArea = document.getElementById('results-area');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            resultsArea.innerHTML = '<p style="text-align:center; color:#555;">已載入 ' + vehicleData.length + ' 筆資料，請開始查詢。</p>';
+            searchInput.focus();
+        });
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            
+            if (query === '') {
+                resultsArea.innerHTML = '<p class="no-result">請輸入要查詢的數字。</p>';
+                return;
+            }
+
+            let foundResults = [];
+
+            for (const item of vehicleData) {
+                const numbersInPlate = item.fullPlate.match(/\d+/g) || [];
+                const isMatch = numbersInPlate.some(num => num === query);
+                
+                if (isMatch) {
+                    foundResults.push(item);
+                }
+            }
+            displayResults(foundResults);
+        }
+
+        function displayResults(results) {
+            resultsArea.innerHTML = ''; 
+
+            if (results.length === 0) {
+                resultsArea.innerHTML = '<p class="no-result">查無本車申請資料。</p>';
+            } else {
+                results.forEach(item => {
+                    const resultElement = document.createElement('div');
+                    resultElement.className = 'result-item';
+                    
+                    resultElement.innerHTML = 
+                        '<span class="plate">車號全碼：' + escapeHTML(item.fullPlate) + '</span>' +
+                        '<span class="unit">所屬單位：' + escapeHTML(item.unit) + '</span>';
+                    
+                    resultsArea.appendChild(resultElement);
+                });
+            }
+        }
+
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[m];
+            });
+        }
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
